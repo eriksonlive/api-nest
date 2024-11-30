@@ -23,10 +23,15 @@ export class AuthService {
     if (user)
       throw new BadRequestException('Este email ya se encuentra registrado');
 
-    return await this.usersServices.create({
+    await this.usersServices.create({
       ...registerDto,
       password: await bcryptjs.hash(registerDto.password, 10),
     });
+
+    return {
+      name: registerDto.name,
+      email: registerDto.email,
+    };
   }
 
   async login(loginDto: LoginDto) {
@@ -38,12 +43,22 @@ export class AuthService {
 
     if (!res) throw new UnauthorizedException('Contraseña incorrecta');
 
-    const payload = { email: user.email };
+    const payload = { email: user.email, role: user.role };
 
     const token = await this.jwtService.signAsync(payload);
+
+    const { password, ...data } = user;
+
     return {
-      ...user,
+      ...data,
       token,
     };
+  }
+
+  async profile({ email, role }: { email: string; role: string }) {
+
+    const { password, ...res } = await this.usersServices.findOneByEmail(email);
+
+    return res;
   }
 }

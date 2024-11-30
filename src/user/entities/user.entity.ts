@@ -21,7 +21,7 @@ export class User {
   password: string;
 
   @Column({ default: 'user' })
-  rol: string;
+  role: string;
 
   @Column({ nullable: true })
   authStrategy: string;
